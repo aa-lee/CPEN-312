@@ -1,0 +1,17 @@
+library IEEE;
+use IEEE.STD_LOGIC_1164.all;
+
+entity addsub8bit is
+    port (
+        -- Input ports
+        KEY0, KEY1 : in STD_LOGIC;
+        -- Output ports
+        LEDR0      : out STD_LOGIC
+    );
+end addsub8bit;
+
+architecture mytest of addsub_8bit is
+    -- Declarations (optional)
+begin
+    LEDR0 <= NOT( (NOT KEY0) OR (NOT KEY1) );
+end mytest;
