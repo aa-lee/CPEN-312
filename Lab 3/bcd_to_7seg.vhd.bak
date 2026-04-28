@@ -1,0 +1,46 @@
+library IEEE;
+use IEEE.STD_LOGIC_1164.all;
+use ieee.numeric_std.all;
+
+entity bcd_to_7seg is
+	port(
+		bcd		: in STD_LOGIC_VECTOR(3 downto 0);
+		output	: out STD_LOGIC_VECTOR(6 downto 0)
+	);
+end bcd_to_7seg;
+
+architecture a of bcd_to_7seg is
+	signal bcd_in		: STD_LOGIC_VECTOR(3 downto 0);
+	signal seg7_out	: STD_LOGIC_VECTOR(0 to 6); -- Given the table, L to R is 0th to 6th bit to display correct
+	
+	begin 
+		bcd_in <= bcd;
+		output <= seg7_out;
+	process(bcd_in) is
+		begin
+			case bcd_in is
+				when "0000" => 
+					seg7_out<="0000001";
+				when "0001" =>
+					seg7_out<="1001111";
+				when "0010" =>
+					seg7_out<="0010010";
+				when "0011" =>
+					seg7_out<="0000110";
+				when "0100" =>
+					seg7_out<="1001100";
+				when "0101" =>
+					seg7_out<="0100100";
+				when "0110" =>
+					seg7_out<="0100000";
+				when "0111" =>
+					seg7_out<="0001111";
+				when "1000" =>
+					seg7_out<="0000000";
+				when "1001" =>
+					seg7_out<="0000100";
+				when others =>
+					seg7_out<="1111111";
+			end case;
+	end process;
+end a;
