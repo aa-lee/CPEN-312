@@ -24,8 +24,10 @@ architecture mytest of BCDaddsub is
     -- Define variables to hold 1st and 2nd BCD digits of operands and sum (4-bit per digit).
    signal a0, a1, b0, b1    	: STD_LOGIC_VECTOR(3 downto 0);
    signal sum0, sum1  			: STD_LOGIC_VECTOR(3 downto 0);
-	signal Ci0, Ci1, Co0, Co1	: STD_LOGIC; -- Carry in and Carry out
+	signal sum0W, sum1W  			: STD_LOGIC_VECTOR(3 downto 0);
+	-- signal Ci0, Ci1, Co0, Co1	: STD_LOGIC; -- Carry in and Carry out
 	signal subflag					: STD_LOGIC;
+	signal overF					: STD_LOGIC;
 	 
 	component bcd_to_7seg is
 		port(
@@ -66,7 +68,7 @@ begin
 		C_in => subflag, 
 		sub => subflag,
 		C_out => lsb_carry,
-		sum => sum0
+		sum => sum0W
 	);
 	
 	add_msb : addsub port map (
@@ -75,9 +77,32 @@ begin
 		C_in => lsb_carry, 
 		sub => subflag,
 		C_out => msb_carry,
-		sum => sum1
+		sum => sum1W
 	);
-	LEDR(3) <= msb_carry; -- If msb_carry = 1, sum is greater than 2-bits.
+	
+	process(subflag)
+		variable result_val : integer;
+		variable temp_val : integer;
+	begin
+		overF <= '0';
+		sum0 <= sum0W; -- Separate vars needed for sum0 and sum0W so sum0 won't rewrite itself.
+		sum1 <= sum1W;
+		if subflag = '1' then
+			if msb_carry = '0' then
+				temp_val := to_integer(unsigned(sum1W)) * 10 + to_integer(unsigned(sum0W));
+				result_val := 100 - temp_val;
+				sum1 <= std_logic_vector(to_unsigned(result_val / 10, 4));
+				sum0 <= std_logic_vector(to_unsigned(result_val mod 10, 4));
+				overF <= '1';
+			end if;
+		else
+			if msb_carry = '1' then
+				overF <= '1';
+			end if;
+		end if;
+	end process;
+	
+	LEDR(3) <= overF; -- If msb_carry = 1, sum is greater than 2-bits.
 	
 	HEX0_out : bcd_to_7seg port map(bcd => sum0, output => HEX0);
 	HEX1_out : bcd_to_7seg port map(bcd => sum1, output => HEX1);
